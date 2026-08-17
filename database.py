@@ -1,11 +1,16 @@
+import os
 import mysql.connector
-
+from dotenv import load_dotenv
+load_dotenv()
 def execute_sql(query):
+    
     connection = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="123456789",
-        database="alert_systems"
+        
+        host=os.getenv("MYSQL_HOST"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        database=os.getenv("MYSQL_DATABASE"),
+        port=(os.getenv("MYSQL_PORT"))
     )
 
     cursor = connection.cursor()
