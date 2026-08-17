@@ -24,4 +24,4 @@ def execute_sql(query):
 
 
 result = execute_sql("SELECT * FROM alerts")   
-print(result) 
+#print(result) 
