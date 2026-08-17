@@ -1,10 +1,14 @@
 import os
+import json
 from dotenv import load_dotenv
 from openai import OpenAI
-import database
+from database import execute_sql
 load_dotenv()
 
 client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+
 tools = [
     {
         "type": "function",
@@ -31,12 +35,39 @@ tools = [
         "strict": True
     }
 ]
-response = client.responses.create(model="gpt-5-mini",input="How many Helmet alerts did Camera_1 generate?",tools=tools)
-# print(response.output)
-for item in response.output:
-    print("TYPE",item.type)
 
+#-------------------------------------------------------------------------
+# 1. FIRST LLM CALL
+#-------------------------------------------------------------------------
+user_question = "How many Helmets alerts did Camera_1 generate?"
+
+first_response = client.responses.create(model="gpt-5-mini",input=user_question,tools=tools)
+
+#-------------------------------------------------------------------------
+# 1. SECOND LLM CALL
+#-------------------------------------------------------------------------
+for item in first_response.output:
     if item.type=="function_call":
-        print("TOOL:",item.name)
-        print("ARGUMENTS:",item.arguments)
-        print("CALL_ID:",item.call_id)
+       tool_name = item.name
+       arguments = json.loads(item.arguments)
+       call_id = item.call_id
+       if tool_name=="execute_sql":
+        query= arguments["query"]
+        #  actual python tool
+        result = execute_sql(query)
+
+        second_response = client.responses.create(
+            model="gpt-5-mini",
+            previous_response_id=first_response.id,
+            input=[
+                {
+                    "type":"function_call_output",
+                    "call_id":call_id,
+                    "output":str(result)
+                }
+            ]
+        )
+
+
+        
+print(second_response.output_text) 

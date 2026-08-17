@@ -14,7 +14,7 @@ def execute_sql(query):
     )
 
     cursor = connection.cursor()
-    cursor.execute("SELECT *FROM alerts")
+    cursor.execute(query)
     results = cursor.fetchall()
 
 
@@ -23,5 +23,4 @@ def execute_sql(query):
     return results
 
 
-result = execute_sql("SELECT * FROM alerts")   
-#print(result) 
+   
