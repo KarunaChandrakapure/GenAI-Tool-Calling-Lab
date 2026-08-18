@@ -39,7 +39,7 @@ tools = [
 #-------------------------------------------------------------------------
 # 1. FIRST LLM CALL
 #-------------------------------------------------------------------------
-user_question = "How many Helmets alerts did Camera_1 generate?"
+user_question = input("Ask a question: ")
 
 first_response = client.responses.create(model="gpt-5-mini",input=user_question,tools=tools)
 
@@ -55,6 +55,9 @@ for item in first_response.output:
         query= arguments["query"]
         #  actual python tool
         result = execute_sql(query)
+        print("TOOL:", tool_name)
+        print("ARGUMENTS:", arguments)
+        print("DATABASE RESULT:", result)
 
         second_response = client.responses.create(
             model="gpt-5-mini",
