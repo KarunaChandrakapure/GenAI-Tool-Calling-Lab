@@ -42,6 +42,7 @@ tools = [
 user_question = input("Ask a question: ")
 
 first_response = client.responses.create(model="gpt-5-mini",input=user_question,tools=tools)
+print(first_response.output_text)
 
 #-------------------------------------------------------------------------
 # 1. SECOND LLM CALL
@@ -70,7 +71,7 @@ for item in first_response.output:
                 }
             ]
         )
+        print(second_response.output_text) 
 
 
         
-print(second_response.output_text) 
