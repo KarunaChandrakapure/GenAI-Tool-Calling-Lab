@@ -11,12 +11,18 @@ def execute_sql(query):
         user=os.getenv("MYSQL_USER"),
         password=os.getenv("MYSQL_PASSWORD"),
         database=os.getenv("MYSQL_DATABASE"),
-        port=(os.getenv("MYSQL_PORT"))
+        port=int((os.getenv("MYSQL_PORT")))
     )
       
    
     cursor = connection.cursor()
     try:
+        query_clean = query.strip().lower()
+        if not query_clean.startswith("select"):
+            return {
+                "success":False,
+                "error":"Only SELECT queries are allowed"
+            }
         cursor.execute(query)
         results = cursor.fetchall()
         return {
@@ -24,8 +30,7 @@ def execute_sql(query):
             'data':results
         }
     except mysql.connector.Error as e:
-        return 
-        {
+        return {
             'success':False,
             'data':str(e)
         }    
@@ -34,7 +39,8 @@ def execute_sql(query):
         cursor.close()
         connection.close() 
 
-
+# result = execute_sql("DROP DISTINCT camera_name FROM alerts ORDER BY camera_name")
+# print(result)
       
   
 
