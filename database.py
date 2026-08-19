@@ -32,16 +32,24 @@ def execute_sql(query):
     except mysql.connector.Error as e:
         return {
             'success':False,
-            'data':str(e)
+            'error':str(e)
         }    
 
     finally:
         cursor.close()
         connection.close() 
 
-# result = execute_sql("DROP DISTINCT camera_name FROM alerts ORDER BY camera_name")
-# print(result)
-      
+def get_schema():
+    return {
+        "table": "alerts",
+        "columns": {
+            "id": "integer - unique alert ID",
+            "date": "date - date of alert",
+            "time": "time - time of alert",
+            "camera_name": "string - camera identifier",
+            "alert_type": "string - type of alert"
+        }
+    }
   
 
 

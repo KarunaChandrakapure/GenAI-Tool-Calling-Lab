@@ -2,7 +2,8 @@ import os
 import json
 from dotenv import load_dotenv
 from openai import OpenAI
-from database import execute_sql
+from database import execute_sql, get_schema
+from sql_validator import validate_sql
 load_dotenv()
 
 client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -35,6 +36,22 @@ tools = [
             "additionalProperties": False
         },
         "strict": True
+    },
+
+    {
+        "type":'function',
+        "name":"get_schema",
+        "description":(
+            "Get thr schema of the alerts database."
+            "Use this when you need to know the available tables."
+            "and columns before generating a SQL query"
+        ),
+        "parameters":{
+            "type":"object",
+            "properties":{},
+            "additionalProperties":False
+        },
+        "strict":True
     }
 ]
 
@@ -78,34 +95,64 @@ while True:
         print("TOOL:", tool_name)
         print("ARGUMENTS:", arguments)
 
+        # -----------------------------------
+        # Execute selected tool
+        # -----------------------------------
+
         if tool_name == "execute_sql":
 
             query = arguments["query"]
 
             print("SQL:", query)
 
-            result = execute_sql(query)
+            validation = validate_sql(query)
+
+            print("VALIDATION:", validation)
+
+            if not validation["valid"]:
+
+                result = {
+                    "success": False,
+                    "error": validation["error"]
+                }
+
+            else:
+
+                result = execute_sql(query)
 
             print("TOOL RESULT:", result)
 
-            response = client.responses.create(
-                model="gpt-5-mini",
-                previous_response_id=response.id,
-                input=[
-                    {
-                        "type": "function_call_output",
-                        "call_id": call_id,
-                        "output": str(result)
-                    }
-                ],
-                tools=tools
-            )
+        elif tool_name == "get_schema":
 
+            result = get_schema()
+
+            print("SCHEMA RESULT:", result)
+
+        # -----------------------------------
+        # Send tool result back to LLM
+        # -----------------------------------
+
+        response = client.responses.create(
+            model="gpt-5-mini",
+            previous_response_id=response.id,
+            input=[
+                {
+                    "type": "function_call_output",
+                    "call_id": call_id,
+                    "output": str(result)
+                }
+            ],
+            tools=tools
+        )
+
+        # Leave the FOR loop
+        # and let WHILE process the new response
         break
 
+    # -----------------------------------
+    # No tool call → final answer
+    # -----------------------------------
 
-    # If the model didn't request a tool,
-    # we're finished.
     if not tool_call_found:
         break
 
@@ -114,7 +161,6 @@ print("\nTOTAL TOOL CALLS:", tool_call_count)
 
 print("\nFINAL ANSWER:")
 print(response.output_text)
-       
         
             
 
