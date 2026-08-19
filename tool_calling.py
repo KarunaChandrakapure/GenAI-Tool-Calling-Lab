@@ -28,7 +28,7 @@ tools = [
                     "type": "string",
                     "description": (
                         "A valid SQL SELECT query using the alerts table. "
-                        "The table contains: id, date, time, camera, alert_type."
+                        "The table contains: id, date, time, camera_name, alert_type."
                     )
                 }
             },
