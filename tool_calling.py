@@ -6,10 +6,11 @@ from database import execute_sql, get_schema
 from sql_validator import validate_sql
 load_dotenv()
 
-client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 
 def ask_llm(user_question):
+    client=OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     tools = [
         {
             "type": "function",
